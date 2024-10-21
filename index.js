@@ -32,6 +32,7 @@ async function run() {
     const waterCollection = client.db('jinStore').collection('water')
     const juiceCollection = client.db('jinStore').collection('juice')
     const drinksCollection = client.db('jinStore').collection('drinks')
+    const shopCollection = client.db('jinStore').collection('shop')
 
 
 
@@ -91,6 +92,21 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await drinksCollection.findOne(query);
+      res.send(result)
+    })
+
+
+    //shop api related
+    app.get('/shop', async (req, res) => {
+      const cursor = shopCollection.find();
+      const result = await cursor.toArray();
+      res.send(result)
+    })
+
+    app.get('/shop/:id', async (req, res) => {
+      const id = req.params.id;
+      const query ={_id: new ObjectId(id)}
+      const result = await shopCollection.findOne(query)
       res.send(result)
     })
 
