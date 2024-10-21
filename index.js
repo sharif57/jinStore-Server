@@ -33,6 +33,8 @@ async function run() {
     const juiceCollection = client.db('jinStore').collection('juice')
     const drinksCollection = client.db('jinStore').collection('drinks')
     const shopCollection = client.db('jinStore').collection('shop')
+    const addCartCollection = client.db('jinStore').collection('addCart')
+    const fruitsCartCollection = client.db('jinStore').collection('fruits')
 
 
 
@@ -105,10 +107,43 @@ async function run() {
 
     app.get('/shop/:id', async (req, res) => {
       const id = req.params.id;
-      const query ={_id: new ObjectId(id)}
+      const query = { _id: new ObjectId(id) }
       const result = await shopCollection.findOne(query)
       res.send(result)
     })
+
+    //addCart api related
+    app.get('/addCart/:email', async (req, res) => {
+      console.log(req.params.email);
+      const email = req.params.email;
+      const query = { email: email }
+      const result = await addCartCollection.find(query).toArray();
+      res.send(result)
+      console.log(result);
+    })
+
+    app.post('/addCart', async (req, res) => {
+      const newUsers = req.body;
+      console.log(newUsers);
+      const result = await addCartCollection.insertOne(newUsers)
+      res.send(result)
+    })
+
+    app.delete('/deleteItem/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await addCartCollection.deleteOne(query)
+      res.send(result)
+    })
+
+    // fruits related api
+    app.get('/fruits', async (req, res) => {
+      const cursor = fruitsCartCollection.find();
+      const result = await cursor.toArray();
+      res.send(result)
+    })
+
+
 
 
     // Send a ping to confirm a successful connection
