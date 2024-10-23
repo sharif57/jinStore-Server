@@ -122,6 +122,12 @@ async function run() {
       console.log(result);
     })
 
+    app.get('/addCart', async (req, res) => {
+      const cursor = addCartCollection.find();
+      const result = await cursor.toArray();
+      res.send(result)
+    })
+
     app.post('/addCart', async (req, res) => {
       const newUsers = req.body;
       console.log(newUsers);
