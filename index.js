@@ -209,6 +209,13 @@ async function run() {
       res.send(result)
     })
 
+    app.delete('/wishCart/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await wishCollection.deleteOne(query)
+      res.send(result)
+    })
+
     // fruits related api
     app.get('/fruits', async (req, res) => {
       const cursor = fruitsCartCollection.find();
