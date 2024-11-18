@@ -1,6 +1,8 @@
 const express = require('express')
 const cors = require('cors')
+require('dotenv').config();
 const app = express()
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
@@ -35,8 +37,48 @@ async function run() {
     const shopCollection = client.db('jinStore').collection('shop')
     const addCartCollection = client.db('jinStore').collection('addCart')
     const fruitsCartCollection = client.db('jinStore').collection('fruits')
+    const userCollection = client.db('jinStore').collection('users')
 
 
+
+    // payment intent 
+
+    app.post('/create-payment-intent', async (req, res) => {
+      const { price } = req.body;
+      const amount = parseInt(price * 100); // Convert to cents
+      console.log(amount, 'this amount');
+
+      // Check if the amount meets Stripe's minimum requirement
+      const MINIMUM_AMOUNT = 1; // Minimum amount in cents for USD, adjust as needed
+
+      if (amount < MINIMUM_AMOUNT) {
+        return res.status(400).json({
+          error: `The amount must be at least $${MINIMUM_AMOUNT / 100} USD.`
+        });
+      }
+
+      try {
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: amount,
+          currency: 'usd',
+          payment_method_types: ['card']
+        });
+
+        res.send({
+          clientSecret: paymentIntent.client_secret
+        });
+      } catch (error) {
+        console.error("Error creating payment intent:", error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    app.post('/users', async (req, res) => {
+      const payment = req.body;
+      const paymentsResult = await userCollection.insertOne(payment)
+      console.log('payment info', payment);
+      res.send(paymentsResult)
+    })
 
 
 
@@ -48,6 +90,7 @@ async function run() {
       console.log(result);
     })
 
+    
     app.get('/tea/:id', async (req, res) => {
       const id = req.params.id
       const query = { _id: new ObjectId(id) }
