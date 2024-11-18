@@ -38,6 +38,7 @@ async function run() {
     const addCartCollection = client.db('jinStore').collection('addCart')
     const fruitsCartCollection = client.db('jinStore').collection('fruits')
     const userCollection = client.db('jinStore').collection('users')
+    const wishCollection = client.db('jinStore').collection('wishCart')
 
 
 
@@ -182,6 +183,29 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) }
       const result = await addCartCollection.deleteOne(query)
+      res.send(result)
+    })
+    
+    // wish card add related api
+    app.post('/wishCart', async (req, res) => {
+      const newUsers = req.body;
+      console.log(newUsers);
+      const result = await wishCollection.insertOne(newUsers)
+      res.send(result)
+    })
+
+    app.get('/wishCart/:email', async (req, res) => {
+      console.log(req.params.email);
+      const email = req.params.email;
+      const query = { email: email }
+      const result = await wishCollection.find(query).toArray();
+      res.send(result)
+      console.log(result);
+    })
+
+    app.get('/wishCart', async (req, res) => {
+      const cursor = wishCollection.find();
+      const result = await cursor.toArray();
       res.send(result)
     })
 
